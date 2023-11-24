@@ -11,6 +11,7 @@ lazy val root = project
       "com.lihaoyi" %% "os-lib" % "0.9.1",
 
       // Test Dependencies
-      "com.novocode" % "junit-interface" % "0.11" % "test"
+      "org.scalactic" %% "scalactic" % "3.2.17",
+      "org.scalatest" %% "scalatest" % "3.2.17" % "test"
     )
   )
