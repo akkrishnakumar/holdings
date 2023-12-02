@@ -14,8 +14,12 @@ def consolidate(holdings: List[Holding]): Unit =
   showPassivePercent(passiveTotal, portfolioTotal)
   showActivePercent(activeTotal, portfolioTotal)
 
+  println("-" * 50)
   println("Percentage of Holdings:")
   active.foreach(asPercentageWithTotal(activeTotal))
+  println("-" * 50)
+  println("Extracting active portfolio...")
+  activeToCSV(active)
 
 def calTotal(holdings: List[Holding]) =
   holdings.map(_.currentValue).sum
@@ -28,7 +32,7 @@ def showActivePercent(active: Double, portfolio: Double) =
 
 def asPercentageWithTotal(total: Double)(holding: Holding) =
   println(
-    s"${holding.instrument}" +
+    s"${holding.instrument} " +
       s"(${holding.quantity}, ${holding.avgCost}):" +
       s" ${calculatePercent(holding, total)} %"
   )
@@ -51,3 +55,6 @@ def passivePercentFrom(holdings: List[Holding], total: Double) =
   val passive =
     holdings.filter(_.instrument.contains("BEES")).map(calPositions).sum
   ((passive / total) * 100).toInt
+
+def activeToCSV(active: List[Holding]) = ???
+//  active.map { h => h.}
