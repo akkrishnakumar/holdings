@@ -1,46 +1,39 @@
 import org.openqa.selenium.firefox.FirefoxDriver
-import utils.{fileContentsToStrings, isInt, tvFileImport}
+import utils.{isInt, tvFileImport}
 
-import java.io.File
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters.*
 
-case class ScanXpath(name: String, id: Int) {
-  override def toString: String = s"//a[@href='/screens/$id/$name/']"
+type Screen = (String, ScanXpath)
+
+case class ScanXpath(name: String, id: String) {
+  override def toString: String =
+    s"//a[@href='/screens/$id/${if (!name.isBlank) s"$name/" else ""}']".trim
 }
 
 val aggressiveScan = "//a[@href='/screens/1364210/aggressive-canslim/']"
 val highPiotroskiScan = "//a[@href='/screens/1296104/high-piotroski/']"
 val relativeStrengthScan = "//a[@href='/screens/1267185/relative-strength/']"
-val growthWithMomtmScan =
-  "//a[@href='/screens/1936281/strong-growth-with-momentum/']"
-
-type Screen = (String, String)
-
-def compounders(): Unit = downloadScreen(
-  "01 - Consistent Compounders.txt" -> "//a[@href='/screens/2204721/consistent-compounders/']"
-)
+val growthWithMomtmScan = ScanXpath("strong-growth-with-momentum", "1936281")
 
 extension (s: String)
   def toScreen: Screen =
     s match
       case "IT" =>
-        "IT sector.txt" -> "/company/compare/00000034/".asLink
+        "IT sector.txt" -> ScanXpath("", "00000034")
       case "PHARMA" =>
-        "Pharma sector.txt" -> "/company/compare/00000046/".asLink
+        "Pharma sector.txt" -> ScanXpath("", "00000046")
       case "HEALTHCARE" =>
-        "Healthcare sector.txt" -> "/company/compare/00000030/".asLink
+        "Healthcare sector.txt" -> ScanXpath("", "00000030")
       case _ =>
-        "" -> "".asLink
+        "" -> ScanXpath("", "")
 
-  def asLink: String =
-    s"//a[@href='$s']"
+def compounders(): Unit = downloadScreen(
+  "Consistent Compounders.txt" -> ScanXpath("consistent-compounders", "2204721")
+)
 
 def downloadSectorConstituents(sector: String): Unit =
-  loginAndThen { implicit driver =>
-    val screen = sector.toScreen
-    tvFileImport(screen._1)(getScreenerList(screen._2).asNseTickers)
-  }
+  downloadScreen(sector.toScreen)
 
 def downloadScreen(screen: Screen): Unit =
   loginAndThen { implicit driver =>
@@ -127,6 +120,11 @@ def logInToScreener(implicit driver: FirefoxDriver): Unit =
 
 def goToScreener(implicit driver: FirefoxDriver): Unit =
   clickUsingXpath("//div[@class='desktop-links']//a[@href='/explore/']")
+
+def getScreenerList(scan: ScanXpath)(implicit
+  driver: FirefoxDriver
+): List[String] =
+  getScreenerList(scan.toString)
 
 def getScreenerList(scan: String)(implicit
   driver: FirefoxDriver

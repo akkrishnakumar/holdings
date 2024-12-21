@@ -15,17 +15,6 @@ def safeRead(file: File): List[String] =
 def safeRead[T](file: File)(f: List[String] => T): T =
   Using.resource(Source.fromFile(file))(s => f(s.getLines.toList))
 
-extension (s: String)
-
-  def csvToStrings: List[String] = fileContentsToStrings(new File(s))
-
-  def toDate: Date =
-    new SimpleDateFormat("dd-MM-yyyy h:mm a", Locale.ENGLISH)
-      .parse(s)
-
-  def isInt: Boolean =
-    s.toIntOption.isDefined
-
 extension (d: Date)
   def toSimpleDateString: String =
     new SimpleDateFormat("yyyy-M-d").format(d)

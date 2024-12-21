@@ -26,10 +26,8 @@ def performOperation(command: String, input: String) =
     case "TrendTemplate"         => trendTemplate()
     case "HighPiotroski"         => highPiotroski()
     case "QualityScan"           => growthWithMomtm()
-    case "fakeCall"              => fakeCall
     case "Score"                 => score()
     case "ConsistentCompounders" => compounders()
-    case "Ranking"               => ranking()
     case "Sectors"               => downloadSectorConstituents(input)
     case "PnL"                   => pnl(input)
     case peerCmd if peerCmd.split("=")(0) == "Peers" =>
@@ -50,67 +48,6 @@ def pnl(fileName: String): Unit =
   println("Extracting PnL....")
   pnl.writeToCsv("pnl-extracted.csv")
   println("Extracting PnL - Done.")
-
-case class Price(ticker: String, price: Float)
-case class ROCRank(ticker: String, roc: Int)
-
-extension (list: List[String])
-  def asNifty500: List[String] =
-    list
-      .drop(2)
-      .map(_.split(",")(0).trim)
-
-  def asPrice: List[Price] =
-    list
-      .drop(1)
-      .map { r =>
-        val split = r.split(",")
-        Price(split(1).trim, split(8).toFloat)
-      }
-
-extension (list: List[Price])
-  def toROCRanking(toFind: Price): Option[ROCRank] =
-    list
-      .find(p => p.ticker == toFind.ticker)
-      .map(p => rocOf(toFind, p))
-
-  def filterOnIndex(index: List[String]): List[Price] =
-    list
-      .filter(l => index.iterator.exists(i => i.contains(l.ticker)))
-
-def rocOf(currentPrice: Price, pastPrice: Price): ROCRank =
-  ROCRank(currentPrice._1, calROC(currentPrice, pastPrice))
-
-def calROC(current: Price, past: Price): Int =
-  (((current._2 - past._2) / past._2) * 100).toInt
-
-def ranking(): Unit =
-  println("Gathering Nifty 500 components...")
-  val nifty500FilePath = s"/Users/akhil/Downloads/data/Nifty500.csv"
-  val nifty500 = fileContentsToStrings(new File(nifty500FilePath)).asNifty500
-
-  println("Creating ranking..")
-  val currentDate = s"/Users/akhil/Downloads/data/EQ290124.csv"
-  val pastDate = s"/Users/akhil/Downloads/data/EQ281123.csv"
-
-  val currentPrices =
-    fileContentsToStrings(new File(currentDate)).asPrice.filterOnIndex(nifty500)
-  val pastPrices =
-    fileContentsToStrings(new File(pastDate)).asPrice.filterOnIndex(nifty500)
-
-  val ranked = currentPrices
-    .flatMap(pastPrices.toROCRanking)
-    .sortWith((roc, rocNxt) => roc._2 > rocNxt._2)
-    .take(50)
-
-  println(ranked)
-  tvFileImport("Week 4.txt")(ranked.map(_.ticker).mkString(","))
-
-def consolidateHoldings(fileName: String) =
-  println("Reading File....")
-  val filePath = s"/Users/akhil/Downloads/$fileName.csv"
-  val holdings = fileContentsToStrings(new File(filePath)).asHoldings
-  consolidate(holdings)
 
 def tvImport(fileName: String): Unit =
   println("Importing for Trading View...")
@@ -157,12 +94,3 @@ def screenerToTv(fileName: String) =
   val rows = safeRead(filePath)(lines => lines.head.split(":::").toList)
   tvFileImport(s"$fileName-TVImport.txt")(rows.asScreenerTickers)
   println("Done!!")
-
-def fakeCall =
-
-  val url = new URL("https://www.google.com")
-  val connection = url.openConnection().asInstanceOf[HttpURLConnection]
-  connection.setRequestMethod("GET")
-
-  val responseCode = connection.getResponseCode
-  println(s"Response Code from Google is $responseCode")
