@@ -1,3 +1,5 @@
+package utils
+
 import os.Path
 
 type FileWriter[T] = T => Boolean

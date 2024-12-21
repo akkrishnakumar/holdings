@@ -1,5 +1,5 @@
 import org.openqa.selenium.firefox.FirefoxDriver
-import utils.fileContentsToStrings
+import utils.{fileContentsToStrings, tvFileImport}
 
 import java.io.File
 import scala.util.Try

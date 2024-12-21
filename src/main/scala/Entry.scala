@@ -1,6 +1,10 @@
-import Operations.{Consolidate, ScreenerToTV, TVImport}
-import utils.{fileContentsToStrings, safeRead}
-import utils.fileFromDownloadFolder
+import utils.{
+  fileContentsToStrings,
+  fileFromDownloadFolder,
+  safeRead,
+  tvFileImport,
+  writeToCsv
+}
 
 import java.io.File
 import java.net.{HttpURLConnection, URL}
@@ -44,7 +48,7 @@ def pnl(fileName: String): Unit =
     }
     .mkString("\n")
   println("Extracting PnL....")
-  tvFileImport("pnl-extracted.csv")(pnl)
+  pnl.writeToCsv("pnl-extracted.csv")
   println("Extracting PnL - Done.")
 
 case class Price(ticker: String, price: Float)

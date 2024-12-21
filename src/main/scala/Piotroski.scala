@@ -1,7 +1,7 @@
 import org.openqa.selenium.By.ByXPath
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.{By, WebElement}
-import utils.{fileContentsToStrings, isInt}
+import utils.{fileContentsToStrings, isInt, tvFileImport}
 
 import java.io.File
 import java.time.Duration

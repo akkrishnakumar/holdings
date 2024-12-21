@@ -1,5 +1,5 @@
 import org.openqa.selenium.firefox.FirefoxDriver
-import utils.{fileContentsToStrings, isInt}
+import utils.{fileContentsToStrings, isInt, tvFileImport}
 
 import java.io.File
 import scala.collection.mutable.ListBuffer
