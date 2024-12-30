@@ -6,33 +6,46 @@ import scala.jdk.CollectionConverters.*
 
 type Screen = (String, ScanXpath)
 
-case class ScanXpath(name: String, id: String) {
+case class ScanXpath(name: String, id: String, link: String) {
   override def toString: String =
-    s"//a[@href='/screens/$id/${if (!name.isBlank) s"$name/" else ""}']".trim
+    s"//a[@href='/$link/$id/${if (!name.isBlank) s"$name/" else ""}']".trim
 }
+
+def SectorXpath(name: String, id: String) =
+  ScanXpath(name, id, "company/compare")
+
+def ScreenXpath(name: String, id: String) =
+  ScanXpath(name, id, "screens")
 
 val aggressiveScan = "//a[@href='/screens/1364210/aggressive-canslim/']"
 val highPiotroskiScan = "//a[@href='/screens/1296104/high-piotroski/']"
 val relativeStrengthScan = "//a[@href='/screens/1267185/relative-strength/']"
-val growthWithMomtmScan = ScanXpath("strong-growth-with-momentum", "1936281")
+val growthWithMomtmScan = ScreenXpath("strong-growth-with-momentum", "1936281")
 
 extension (s: String)
   def toScreen: Screen =
-    s match
+    s.toUpperCase match
       case "IT" =>
-        "IT sector.txt" -> ScanXpath("", "00000034")
+        "IT sector.txt" -> SectorXpath("", "00000034")
       case "PHARMA" =>
-        "Pharma sector.txt" -> ScanXpath("", "00000046")
+        "Pharma sector.txt" -> SectorXpath("", "00000046")
       case "HEALTHCARE" =>
-        "Healthcare sector.txt" -> ScanXpath("", "00000030")
+        "Healthcare sector.txt" -> SectorXpath("", "00000030")
+      case "SUGAR" =>
+        "Sugar sector.txt" -> SectorXpath("", "00000059")
+
+        // FINANce 00000026
       case _ =>
-        "" -> ScanXpath("", "")
+        "" -> SectorXpath("", "")
 
 def compounders(): Unit = downloadScreen(
-  "Consistent Compounders.txt" -> ScanXpath("consistent-compounders", "2204721")
+  "Consistent Compounders.txt" -> ScreenXpath(
+    "consistent-compounders",
+    "2204721"
+  )
 )
 
-def downloadSectorConstituents(sector: String): Unit =
+def downloadSector(sector: String): Unit =
   downloadScreen(sector.toScreen)
 
 def downloadScreen(screen: Screen): Unit =

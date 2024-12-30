@@ -28,7 +28,7 @@ def performOperation(command: String, input: String) =
     case "QualityScan"           => growthWithMomtm()
     case "Score"                 => score()
     case "ConsistentCompounders" => compounders()
-    case "Sectors"               => downloadSectorConstituents(input)
+    case "Sectors"               => downloadSector(input)
     case "PnL"                   => pnl(input)
     case peerCmd if peerCmd.split("=")(0) == "Peers" =>
       fetchPeersOf(peerCmd.split("=")(1))
