@@ -38,7 +38,6 @@ def sortWithHighRS(fileNames: List[String], tickerColumn: Int = 1): Unit =
   }
 
 def getHighRS(implicit driver: FirefoxDriver): Map[String, Int] =
-  clickUsingXpath(relativeStrengthScan)
 
   val rsStocks = mutable.Map[String, Int]()
 

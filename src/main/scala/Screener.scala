@@ -17,14 +17,15 @@ def SectorXpath(name: String, id: String) =
 def ScreenXpath(name: String, id: String) =
   ScanXpath(name, id, "screens")
 
-val aggressiveScan = "//a[@href='/screens/1364210/aggressive-canslim/']"
+val canslimSoicScan = "//a[@href='/screens/1364210/canslim-soic/']"
 val highPiotroskiScan = "//a[@href='/screens/1296104/high-piotroski/']"
-val relativeStrengthScan = "//a[@href='/screens/1267185/relative-strength/']"
+// val relativeStrengthScan = "//a[@href='/screens/1267185/relative-strength/']"
+val relativeStrengthScan = ScreenXpath("relative-strength", "1267185")
 val growthWithMomtmScan = ScreenXpath("strong-growth-with-momentum", "1936281")
 
 extension (s: String)
   def toScreen: Screen =
-    s.toUpperCase match
+    s match
       case "IT" =>
         "IT sector.txt" -> SectorXpath("", "00000034")
       case "PHARMA" =>
@@ -33,8 +34,12 @@ extension (s: String)
         "Healthcare sector.txt" -> SectorXpath("", "00000030")
       case "SUGAR" =>
         "Sugar sector.txt" -> SectorXpath("", "00000059")
+      case "NonFerrous" =>
+        "Non Ferrous Metals Sector.txt" -> SectorXpath("", "00000040")
+      case "Steel" =>
+        "Steel Sector.txt" -> SectorXpath("", "00000057")
 
-        // FINANce 00000026
+      // FINANce 00000026
       case _ =>
         "" -> SectorXpath("", "")
 
@@ -53,10 +58,10 @@ def downloadScreen(screen: Screen): Unit =
     tvFileImport(screen._1)(getScreenerList(screen._2).asNseTickers)
   }
 
-def strongCanslim(): Unit =
+def canslimSoic(): Unit =
   loginAndThen { implicit driver =>
-    tvFileImport("03 - Strong-Canslim.txt")(
-      getScreenerList(aggressiveScan).asNseTickers
+    tvFileImport("Canslim-SOIC.txt")(
+      getScreenerList(canslimSoicScan).asNseTickers
     )
   }
 
@@ -76,7 +81,7 @@ def highPiotroski(): Unit =
 
 def relativeStrength(): Unit =
   loginAndThen { implicit driver =>
-    tvFileImport("02 - HighRS.txt")(
+    tvFileImport("High RS.txt")(
       getScreenerList(relativeStrengthScan).asNseTickers
     )
   }
@@ -178,7 +183,7 @@ def getScreenerPageListTickerNames(implicit
   driver: FirefoxDriver
 ): List[String] =
   findElementsUsingXpath(
-    s"//table[@class='data-table text-nowrap striped mark-visited']//tr/td[2]/a"
+    s"//table[@class='data-table text-nowrap striped mark-visited no-scroll-right']//tr/td[2]/a"
   ).asScala.map { e =>
     val name = e.getAttribute("href").split("/")(4)
     if (name.isInt) s"BSE:${e.getAttribute("text")}"

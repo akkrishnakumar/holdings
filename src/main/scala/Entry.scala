@@ -21,7 +21,7 @@ def performOperation(command: String, input: String) =
     case "TvImport"              => tvImport(fileName = input)
     case "Inspect"               => inspect()
     case "SectionedByIndustry"   => sectionedByIndustry()
-    case "StrongCanslim"         => strongCanslim()
+    case "CanslimSoic"           => canslimSoic()
     case "HighRS"                => relativeStrength()
     case "TrendTemplate"         => trendTemplate()
     case "HighPiotroski"         => highPiotroski()
