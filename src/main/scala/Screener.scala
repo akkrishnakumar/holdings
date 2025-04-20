@@ -55,35 +55,44 @@ def downloadSector(sector: String): Unit =
 
 def downloadScreen(screen: Screen): Unit =
   loginAndThen { implicit driver =>
-    tvFileImport(screen._1)(getScreenerList(screen._2).asNseTickers)
+    tvFileImport(screen._1)(getScreenerList(screen._2).asNseTickers())
   }
 
 def canslimSoic(): Unit =
   loginAndThen { implicit driver =>
     tvFileImport("Canslim-SOIC.txt")(
-      getScreenerList(canslimSoicScan).asNseTickers
+      getScreenerList(canslimSoicScan).asNseTickers()
     )
   }
 
 def growthWithMomtm(): Unit =
   loginAndThen { implicit driver =>
     tvFileImport("03 - Growth With Momentum.txt")(
-      getScreenerList(growthWithMomtmScan).asNseTickers
+      getScreenerList(growthWithMomtmScan).asNseTickers()
     )
   }
 
 def highPiotroski(): Unit =
   loginAndThen { implicit driver =>
     tvFileImport("03 - High Piotroski.txt")(
-      getScreenerList(highPiotroskiScan).asNseTickers
+      getScreenerList(highPiotroskiScan).asNseTickers()
     )
   }
 
+type Filter = String => String
+
+val bseMap = Map("NSE:KOVAI" -> "KOVAI", "NSE:MINDSPACE" -> "MINDSPACE")
+val Filter_RS: Filter = (ticker: String) =>
+  bseMap
+    .find((k, _) => k == ticker)
+    .map((_, v) => v)
+    .getOrElse(ticker)
+
 def relativeStrength(): Unit =
   loginAndThen { implicit driver =>
-    tvFileImport("High RS.txt")(
-      getScreenerList(relativeStrengthScan).asNseTickers
-    )
+    val list = getScreenerList(relativeStrengthScan)
+    tvFileImport("High RS.txt")(list.asNseTickers(Filter_RS))
+    println(s"List count: ${list.size}")
   }
 
 def fetchPeersOf(ticker: String): Unit =
@@ -113,7 +122,7 @@ def fetchSectorPeers(ticker: String)(implicit driver: FirefoxDriver): Unit =
   val sector = sectorElement.getText
   sectorElement.click()
   tvFileImport(s"$sector.txt")(
-    getScreenerAllPageListWithIndex.toList.asNseTickers
+    getScreenerAllPageListWithIndex.toList.asNseTickers()
   )
 
 def fetchIndustryPeers(ticker: String)(implicit driver: FirefoxDriver): Unit =
@@ -122,7 +131,7 @@ def fetchIndustryPeers(ticker: String)(implicit driver: FirefoxDriver): Unit =
   val industry = industryElement.getText
   industryElement.click()
   tvFileImport(s"$industry.txt")(
-    getScreenerAllPageListWithIndex.toList.asNseTickers
+    getScreenerAllPageListWithIndex.toList.asNseTickers()
   )
 
 def logInToScreener(implicit driver: FirefoxDriver): Unit =
@@ -187,5 +196,5 @@ def getScreenerPageListTickerNames(implicit
   ).asScala.map { e =>
     val name = e.getAttribute("href").split("/")(4)
     if (name.isInt) s"BSE:${e.getAttribute("text")}"
-    else s"NSE:$name"
+    else s"$name"
   }.toList

@@ -19,9 +19,10 @@ object Ticker:
 
 extension (list: List[String])
 
-  def asNseTickers: String =
+  def asNseTickers(filter: String => String = identity): String =
     list
       .map(Ticker(_).name)
+      .map(filter)
       .mkString(",")
 
   def asTVTickers(symbolCol: Int = 1): String =

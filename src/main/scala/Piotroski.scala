@@ -31,7 +31,7 @@ def sortWithHighRS(fileNames: List[String], tickerColumn: Int = 1): Unit =
           if (highRS.contains(ticker)) ticker :: acc else acc
         }
 
-      tvFileImport(s"Weekly - HighRS.txt")(highRSStocks.asNseTickers)
+      tvFileImport(s"Weekly - HighRS.txt")(highRSStocks.asNseTickers())
     }
 
     println("Momentum files generated !")
