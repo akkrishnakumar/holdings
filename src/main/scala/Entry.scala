@@ -1,26 +1,20 @@
-import utils.{
-  fileContentsToStrings,
-  fileFromDownloadFolder,
-  safeRead,
-  tvFileImport,
-  writeToCsv
-}
+import utils.{fileContentsToStrings, fileFromDownloadFolder, safeRead, tvFileImport, writeToCsv, findFilesStartingWith}
 
 import java.io.File
 import java.net.{HttpURLConnection, URL}
 
 @main
-def Entry(command: String, fileName: String) =
+def Entry(command: String, fileName: String, stockCol: Int, industryCol: Int) =
   println("=" * 100)
-  performOperation(command, fileName)
+  performOperation(command, fileName, stockCol, industryCol)
   println("=" * 100)
 
-def performOperation(command: String, input: String) =
+def performOperation(command: String, input: String, stockCol: Int, industryCol: Int) =
   command match
     case "Breakout"              => breakOutWithVolume()
     case "TvImport"              => tvImport(fileName = input)
     case "Inspect"               => inspect()
-    case "SectionedByIndustry"   => sectionedByIndustry()
+    case "DailySectorMvmt"       => dailySectorMvmt(fileName = input, stockCol, industryCol)
     case "CanslimSoic"           => canslimSoic()
     case "HighRS"                => relativeStrength()
     case "TrendTemplate"         => trendTemplate()
@@ -30,6 +24,7 @@ def performOperation(command: String, input: String) =
     case "ConsistentCompounders" => compounders()
     case "Sectors"               => downloadSector(input)
     case "PnL"                   => pnl(input)
+    case "NiftyIndices"          => niftyIndices()
     case peerCmd if peerCmd.split("=")(0) == "Peers" =>
       fetchPeersOf(peerCmd.split("=")(1))
 
@@ -50,43 +45,59 @@ def pnl(fileName: String): Unit =
   println("Extracting PnL - Done.")
 
 def tvImport(fileName: String): Unit =
+  tvImport(fileName, fileName)
+
+def tvImport(chartinkFileName: String, exportFileName: String) =
   println("Importing for Trading View...")
-  val filePath = s"/Users/akhil/Downloads/$fileName.csv"
-  tvFileImport(s"$fileName.txt")(
-    fileContentsToStrings(new File(filePath)).asTVTickers(2)
-  )
+  val filePath = s"/Users/akhil/Downloads/$chartinkFileName.csv"
+  tvFileImport(s"$exportFileName.txt")(fileContentsToStrings(new File(filePath)).asTVTickers(2))
   println("Done!!")
 
 def inspect(): Unit =
   println("Importing for Trading View...")
   val filePath = s"/Users/akhil/Downloads/Inspect.csv"
-  tvFileImport("Inspect.txt")(
-    fileContentsToStrings(new File(filePath)).asTVTickers(1)
-  )
+  tvFileImport("Inspect.txt")(fileContentsToStrings(new File(filePath)).asTVTickers(1))
   println("Done!!")
 
-def sectionedByIndustry(): Unit =
-  println("Importing Sectioned Sectors for Trading View...")
-  val filePath = s"/Users/akhil/Downloads/Inspect.csv"
-  tvFileImport("Inspect.txt")(
-    fileContentsToStrings(new File(filePath))
-      .map(l => stockWithIndustry(l.split(",")))
-      .groupBy { case (industry, _) => industry }
+// TODO
+// Search download folder for all files starting with "ind"
+// Create index tv export out of it.
+// TODO: Output custom Index also
+
+def niftyIndices(): Unit =
+  println("Exporting Nifty indices.....")
+  val files = findFilesStartingWith("/Users/akhil/Downloads/", "ind_")
+  if (!files.isEmpty)
+    files.foreach { f =>
+      val fileName = f.getName.split("_")(1).replace("nifty", "")
+      val tickers = fileContentsToStrings(f).tail
+        .map(row => Ticker(row.split(",")(2)).name)
+
+      println("-" * 100)
+      println(s"Generating TV Import for: $fileName...")
+      tvFileImport(s"$fileName.txt")(tickers.mkString(","))
+      println("-" * 100)
+    }
+    println("Done!")
+  else println("No files with prefix 'ind_' found.")
+
+def dailySectorMvmt(fileName: String, stockCol: Int, IndustryCol: Int): Unit =
+  println("Movers and sorting with Industry for Trading View...")
+  val filePath = s"/Users/akhil/Downloads/$fileName.csv"
+  tvFileImport(s"$fileName.txt") {
+    fileContentsToStrings(new File(filePath)).tail
+      .map(_.stockAndIndustry(stockCol, IndustryCol))
+      .groupBy { case (_, industry) => industry }
       .flatMap { case (industry, tickers) =>
         List(s"###$industry") ++ tickers.asNseTickerList
       }
       .toList
       .mkString(",")
-  )
+  }
   println("Done!!")
 
-private def stockWithIndustry(split: Array[String]) =
-  split(1) -> split(2)
-
-/** JS Script Get href and stock name
-  * [...document.querySelectorAll("td>a")].map(e => e.href + ", " +
-  * e.innerText).join(":::") Href has the NSE Ticker name. Compress stock name
-  * if the Ticker name is not NSE compatible.
+/** JS Script Get href and stock name [...document.querySelectorAll("td>a")].map(e => e.href + ", " +
+  * e.innerText).join(":::") Href has the NSE Ticker name. Compress stock name if the Ticker name is not NSE compatible.
   */
 def screenerToTv(fileName: String) =
   println("Importing from Screener to TradingView List...")
@@ -94,3 +105,8 @@ def screenerToTv(fileName: String) =
   val rows = safeRead(filePath)(lines => lines.head.split(":::").toList)
   tvFileImport(s"$fileName-TVImport.txt")(rows.asScreenerTickers)
   println("Done!!")
+
+extension (s: String)
+  def stockAndIndustry(stock: Int, industry: Int): (String, String) =
+    val split = s.split(",")
+    split(stock) -> split(industry)

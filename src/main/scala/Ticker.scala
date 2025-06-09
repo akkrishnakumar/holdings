@@ -63,4 +63,7 @@ extension (list: List[String])
 
 extension (list: List[(String, String)])
   def asNseTickerList: List[String] =
-    list.map { case (_, ticker) => s"NSE:$ticker" }
+    list.map { case (ticker, _) =>
+      val tvCompatibleTicker = ticker.replaceAll("-", "_")
+      s"NSE:$tvCompatibleTicker"
+    }

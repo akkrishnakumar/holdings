@@ -1,13 +1,14 @@
 import org.openqa.selenium.firefox.FirefoxDriver
-import utils.{fileContentsToStrings, tvFileImport}
+import utils.{fileContentsToStrings, tvFileImport, today}
 
 import java.io.File
+import java.util.Date
 import scala.util.Try
 
 val powerPlayUrl = "https://chartink.com/screener/power-play-high-tight-flag"
 val near50dmaUrl = "https://chartink.com/screener/near-50dma-8"
 val near20dmaUrl = "https://chartink.com/screener/flattening-sma20"
-val trendTemplateUrl = "https://chartink.com/screener/trend-template-2168"
+val trendTemplateUrl = "https://chartink.com/screener/akhil-s-trend-template-10-05-2025"
 
 def score(): Unit =
   println("Importing for Trading View...")
@@ -40,7 +41,7 @@ def near20dma(): Unit =
 def trendTemplate(): Unit =
   withImplicitDriver { implicit driver =>
     downloadFromChartink(trendTemplateUrl)
-    tvImport("Trend Template, Technical Analysis Scanner")
+    tvImport(s"Akhils Trend Template - 10052025, Technical Analysis Scanner", s"Trend Template - ${today}")
   }
 
 val breakoutWithVolumeUrl =

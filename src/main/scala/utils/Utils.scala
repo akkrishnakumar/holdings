@@ -2,6 +2,8 @@ package utils
 
 import java.io.File
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.{Date, Locale}
 import scala.io.Source
 import scala.util.Using
@@ -18,3 +20,8 @@ def safeRead[T](file: File)(f: List[String] => T): T =
 extension (d: Date)
   def toSimpleDateString: String =
     new SimpleDateFormat("yyyy-M-d").format(d)
+
+def today =
+  val date = LocalDate.now
+  val formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy")
+  date.format(formatter)
